@@ -1,0 +1,38 @@
+name: Run Knowledge Connector
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"   # runs every 30 minutes
+  workflow_dispatch:
+
+jobs:
+  run-connector:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build app
+        run: npm run build
+
+      - name: Run connector
+        run: npm start
+        env:
+          CONFIGURER: genesys
+
+          GENESYS_LOGIN_URL: https://login.mypurecloud.com
+          GENESYS_BASE_URL: https://api.mypurecloud.com
+
+          GENESYS_CLIENT_ID: ${{ secrets.CLIENT_ID }}
+          GENESYS_CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
+          GENESYS_KNOWLEDGE_BASE_ID: ${{ secrets.KB_ID }}
+``
