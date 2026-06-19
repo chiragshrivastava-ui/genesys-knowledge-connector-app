@@ -2,7 +2,7 @@ name: Run Knowledge Connector
 
 on:
   schedule:
-    - cron: "*/30 * * * *"   # runs every 30 minutes
+    - cron: "*/30 * * * *"
   workflow_dispatch:
 
 jobs:
@@ -28,11 +28,8 @@ jobs:
         run: npm start
         env:
           CONFIGURER: genesys
-
           GENESYS_LOGIN_URL: https://login.mypurecloud.com
           GENESYS_BASE_URL: https://api.mypurecloud.com
-
           GENESYS_CLIENT_ID: ${{ secrets.CLIENT_ID }}
           GENESYS_CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
           GENESYS_KNOWLEDGE_BASE_ID: ${{ secrets.KB_ID }}
-``
