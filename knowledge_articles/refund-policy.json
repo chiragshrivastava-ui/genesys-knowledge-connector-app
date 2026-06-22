@@ -1,5 +1,6 @@
 {
   "id": "4",
   "title": "Refund Policy",
-  "content": "Verify payment method, Check transaction date, Initiate refund"
+  "content": "<p>Verify payment method</p><p>Check transaction date</p><p>Initiate refund</p>",
+  "category": "Claims"
 }
