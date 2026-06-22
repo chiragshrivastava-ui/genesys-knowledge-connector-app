@@ -1,8 +1,6 @@
-# Order Cancellation
-## Rules
-Order can be cancelled before shipping
-- Refund will be processed within 5 days
-## Steps
-1. Open order details
-2. Click cancel
-3. Confirm request
+{
+  "id": "2",
+  "title": "Cancellation",
+  "content": "Refund will be processed within 5 days",
+  "category": "Claims"
+}
