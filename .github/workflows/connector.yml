@@ -27,7 +27,7 @@ jobs:
       - name: Run connector
         run: npm start
         env:
-          CONFIGURER: genesys
+          CONFIGURER: customkb
           GENESYS_LOGIN_URL: https://login.mypurecloud.com
           GENESYS_BASE_URL: https://api.mypurecloud.com
           GENESYS_CLIENT_ID: ${{ secrets.CLIENT_ID }}
