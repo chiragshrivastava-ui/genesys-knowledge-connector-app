@@ -1,13 +1,5 @@
-1     # Refund Policy
-2     
-3     ## Eligibility
-4     Refund is allowed within 30 days for credit card payments.
-5     
-6     ## Steps
-7     1. Verify payment method
-8     2. Check transaction date
-9     3. Initiate refund
-10     
-11     ## Exceptions
-12     - No refund after 30 days
-13     - Gift cards are not refundable
+{
+  "id": "4",
+  "title": "refund policy",
+  "content": "Verify payment method, Check transction date, Initiate refund"
+}
