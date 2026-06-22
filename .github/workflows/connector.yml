@@ -28,9 +28,9 @@ jobs:
         env:
           CONFIGURER: customkb
 
-          GENESYS_LOGIN_URL: https://login.mypurecloud.com
-          GENESYS_BASE_URL: https://api.mypurecloud.com
+          GENESYS_LOGIN_URL: https://login.euw2.pure.cloud
+          GENESYS_BASE_URL: https://api.euw2.pure.cloud
 
-          GENESYS_CLIENT_ID: ${{ secrets.CLIENT_ID }}
-          GENESYS_CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
-          GENESYS_KNOWLEDGE_BASE_ID: 3d5de442-ce9b-4cc1-b892-03836bb92d1f
+          GENESYS_CLIENT_ID: cfffb7d4-bd7c-44ba-b3c8-66adc7abdb25
+          GENESYS_CLIENT_SECRET: G93C__1Oi9wZ1qkL5jTPuAP7huqpFHSZXQVA41oF0yioJscmI1hnDgdIE0A8
+          GENESYS_KNOWLEDGE_BASE_ID: 4742af15-a3c0-4a7d-861c-e90ca3c825f9
