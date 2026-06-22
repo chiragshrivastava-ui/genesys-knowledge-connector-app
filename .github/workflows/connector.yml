@@ -1,13 +1,12 @@
 name: Run Knowledge Connector
 
 on:
-  schedule:
-    - cron: "*/30 * * * *"
   workflow_dispatch:
 
 jobs:
   run-connector:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     steps:
       - name: Checkout repo
@@ -28,8 +27,10 @@ jobs:
         run: npm start
         env:
           CONFIGURER: customkb
+
           GENESYS_LOGIN_URL: https://login.mypurecloud.com
           GENESYS_BASE_URL: https://api.mypurecloud.com
+
           GENESYS_CLIENT_ID: ${{ secrets.CLIENT_ID }}
           GENESYS_CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
           GENESYS_KNOWLEDGE_BASE_ID: ${{ secrets.KB_ID }}
