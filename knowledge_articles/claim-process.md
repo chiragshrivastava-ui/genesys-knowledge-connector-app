@@ -1,10 +1,12 @@
 ID: 1
 TITLE: Claim Process  
 
-## Steps to Submit a Claim
+## Claim Submission Process
+
+Follow these steps to submit a claim:
 
 - Login to the portal  
-- Fill the claim form  
+- Fill in the claim form  
 - Upload required documents  
 - Submit the claim  
-- Track claim status
+- Track the claim status
