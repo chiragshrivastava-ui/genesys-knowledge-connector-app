@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 
 export async function fetchArticles() {
-  const dir = path.join(process.cwd(), "articles");
+  const dir = path.join(process.cwd(), "knowledge_articles");
 
   const files = fs.readdirSync(dir);
 
