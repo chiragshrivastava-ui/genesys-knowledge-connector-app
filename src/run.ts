@@ -44,6 +44,7 @@ async function main() {
           },
           body: JSON.stringify({
             name: doc.title,
+            title: doc.title,
             externalId: doc.externalId,
             visible: true,
             language: "en-US",
