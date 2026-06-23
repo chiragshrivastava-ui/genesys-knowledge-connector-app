@@ -1,3 +1,4 @@
+
 name: Run Knowledge Connector
 
 on:
@@ -20,14 +21,8 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Build app
-        run: npm run build
-
-      - name: Check dist folder
-        run: ls -R
-
       - name: Run connector
-        run: npm start
+        run: npx ts-node src/run.ts
         env:
           CONFIGURER: customkb
 
