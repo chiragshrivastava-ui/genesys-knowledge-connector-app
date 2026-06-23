@@ -1,4 +1,4 @@
-import { pipe } from "../pipe.js";
+import { pipe } from "../pipe";
 import { fetchArticles } from "../adapters/source/customkb/fetchArticles.js";
 
 export default function customkbConfigurer() {
