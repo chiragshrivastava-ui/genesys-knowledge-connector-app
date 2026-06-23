@@ -1,4 +1,3 @@
-
 name: Run Knowledge Connector
 
 on:
@@ -7,7 +6,6 @@ on:
 jobs:
   run-connector:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
 
     steps:
       - name: Checkout repo
@@ -21,14 +19,20 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Build project
+        run: npm run build
+
+      - name: Verify dist
+        run: ls -R
+
       - name: Run connector
-        run: npx ts-node src/run.ts
+        run: npm start
         env:
           CONFIGURER: customkb
 
           GENESYS_LOGIN_URL: https://login.euw2.pure.cloud
           GENESYS_BASE_URL: https://api.euw2.pure.cloud
 
-          GENESYS_CLIENT_ID: cfffb7d4-bd7c-44ba-b3c8-66adc7abdb25
-          GENESYS_CLIENT_SECRET: G93C__1Oi9wZ1qkL5jTPuAP7huqpFHSZXQVA41oF0yioJscmI1hnDgdIE0A8
-          GENESYS_KNOWLEDGE_BASE_ID: 4742af15-a3c0-4a7d-861c-e90ca3c825f9
+          GENESYS_CLIENT_ID: ${{ secrets.CLIENT_ID }}
+          GENESYS_CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
+          GENESYS_KNOWLEDGE_BASE_ID: ${{ secrets.KB_ID }}
