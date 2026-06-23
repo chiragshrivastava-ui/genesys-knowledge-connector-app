@@ -1,12 +1,13 @@
 import { pipe } from "../pipe";
-import { fetchArticles } from "../adapters/source/customkb/fetchArticles.ts";
+import { fetchArticles } from "../adapters/source/customkb/fetchArticles";
 
 export default function customkbConfigurer() {
+
   pipe.addStep(async (context: any) => {
 
     const articles = await fetchArticles();
 
-    const transformed = articles.map(article => ({
+    const docs = articles.map(article => ({
       externalId: article.id,
       title: article.title,
       content: {
@@ -14,7 +15,7 @@ export default function customkbConfigurer() {
       }
     }));
 
-    context.documents = transformed;
+    context.documents = docs;
 
     return context;
   });
