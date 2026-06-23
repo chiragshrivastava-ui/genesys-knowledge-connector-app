@@ -62,17 +62,35 @@ async function main() {
         }
       );
 
-      // ✅ CRITICAL FIX: Read RAW response
       const responseText = await response.text();
 
       console.log(`📦 RESPONSE for "${doc.title}":`);
       console.log(responseText);
 
-      // ✅ Extra safety: check status
       if (!response.ok) {
         console.error(`❌ Failed for ${doc.title} - Status: ${response.status}`);
-      } else {
-        console.log(`✅ Successfully sent: ${doc.title}`);
+        continue;
+      }
+
+      console.log(`✅ Successfully sent: ${doc.title}`);
+
+      // ✅ ✅ PUBLISH STEP (FINAL FIX)
+      try {
+        const result = JSON.parse(responseText);
+
+        await fetch(
+          `${process.env.GENESYS_BASE_URL}/api/v2/knowledge/knowledgebases/${process.env.GENESYS_KNOWLEDGE_BASE_ID}/documents/${result.id}/publish`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
+        );
+
+        console.log(`✅ Published: ${doc.title}`);
+      } catch (err) {
+        console.error(`⚠️ Publish failed for ${doc.title}`, err);
       }
     }
 
@@ -81,7 +99,3 @@ async function main() {
   } catch (error) {
     console.error("❌ Error:", error);
     process.exit(1);
-  }
-}
-
-main();
