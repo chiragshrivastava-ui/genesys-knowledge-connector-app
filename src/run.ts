@@ -30,7 +30,7 @@ async function main() {
 
     console.log("✅ Authenticated with Genesys");
 
-    // ✅ STEP 2: Push documents
+    // ✅ STEP 2: Create + Publish
     for (const doc of documents) {
 
       const response = await fetch(
@@ -71,14 +71,22 @@ async function main() {
         continue;
       }
 
-      console.log(`✅ Successfully sent: ${doc.title}`);
+      console.log(`✅ Created: ${doc.title}`);
 
-      // ✅ STEP 3: Publish document
+      // ✅ ✅ STEP 3: Publish VARIATION (THIS IS THE REAL FIX)
       try {
         const result = JSON.parse(responseText);
 
+        const documentId = result.id;
+        const variationId = result.variations?.[0]?.id;
+
+        if (!variationId) {
+          console.error(`❌ No variationId found for ${doc.title}`);
+          continue;
+        }
+
         await fetch(
-          `${process.env.GENESYS_BASE_URL}/api/v2/knowledge/knowledgebases/${process.env.GENESYS_KNOWLEDGE_BASE_ID}/documents/${result.id}/publish`,
+          `${process.env.GENESYS_BASE_URL}/api/v2/knowledge/knowledgebases/${process.env.GENESYS_KNOWLEDGE_BASE_ID}/documents/${documentId}/variations/${variationId}/publish`,
           {
             method: "POST",
             headers: {
@@ -94,7 +102,7 @@ async function main() {
       }
     }
 
-    console.log("✅ Process completed");
+    console.log("✅ Process completed ✅");
 
   } catch (error) {
     console.error("❌ Error:", error);
