@@ -6,10 +6,9 @@ async function main() {
     console.log("🚀 Starting connector...");
 
     const documents = await customkbConfigurer();
-
     console.log(`✅ Documents fetched: ${documents.length}`);
 
-    // ✅ Step 1: Get OAuth token
+    // ✅ Get OAuth token
     const tokenResponse = await fetch(
       `${process.env.GENESYS_LOGIN_URL}/oauth/token`,
       {
@@ -31,9 +30,8 @@ async function main() {
 
     console.log("✅ Authenticated with Genesys");
 
-    // ✅ Step 2: Push each document
+    // ✅ Push each document
     for (const doc of documents) {
-
       const response = await fetch(
         `${process.env.GENESYS_BASE_URL}/api/v2/knowledge/knowledgebases/${process.env.GENESYS_KNOWLEDGE_BASE_ID}/documents`,
         {
@@ -54,10 +52,10 @@ async function main() {
                 type: "Article",
                 state: "published",
                 body: {
-                  content: doc.content.body
-                }
-              }
-            ]
+                  content: doc.content.body,
+                },
+              },
+            ],
           }),
         }
       );
@@ -74,7 +72,7 @@ async function main() {
 
       console.log(`✅ Successfully sent: ${doc.title}`);
 
-      // ✅ ✅ PUBLISH STEP (FINAL FIX)
+      // ✅ Publish document
       try {
         const result = JSON.parse(responseText);
 
@@ -86,16 +84,3 @@ async function main() {
               Authorization: `Bearer ${accessToken}`,
             },
           }
-        );
-
-        console.log(`✅ Published: ${doc.title}`);
-      } catch (err) {
-        console.error(`⚠️ Publish failed for ${doc.title}`, err);
-      }
-    }
-
-    console.log("✅ Process completed");
-
-  } catch (error) {
-    console.error("❌ Error:", error);
-    process.exit(1);
