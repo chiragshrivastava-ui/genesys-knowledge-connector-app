@@ -2,9 +2,9 @@
   "name": "knowledge-connector-app",
   "version": "0.12.1",
   "description": "Knowledge Connector App",
-  "module": "./dist/index.js",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -28,29 +28,30 @@
     },
     "./package.json": "./package.json"
   },
-  "files": [
-    "dist",
-    "README.md",
-    "LICENSE"
-  ],
-  "type": "module",
+
+  "files": ["dist", "README.md", "LICENSE"],
+
   "scripts": {
     "clean": "rimraf dist",
-    "start": "node dist/run.js",
     "build": "tsc --declaration",
+    "start": "node dist/run.js",
     "test": "jest",
     "lint": "npx eslint ."
   },
+
   "author": "Genesys Cloud Services, Inc.",
   "license": "MIT",
+
   "engines": {
-    "node": ">=22",
-    "npm": ">=10"
+    "node": ">=18",
+    "npm": ">=8"
   },
+
   "repository": {
     "type": "git",
     "url": "https://github.com/MyPureCloud/knowledge-connector-app.git"
   },
+
   "devDependencies": {
     "@eslint/js": "10.0.1",
     "@jest/globals": "30.3.0",
@@ -69,6 +70,7 @@
     "typescript": "5.9.3",
     "typescript-eslint": "8.58.2"
   },
+
   "dependencies": {
     "dotenv": "17.4.2",
     "file-type": "21.3.4",
