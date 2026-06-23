@@ -1,8 +1,8 @@
 import { pipe } from "../pipe";
-import { fetchArticles } from "../adapters/source/customkb/fetchArticles.js";
+import { fetchArticles } from "../adapters/source/customkb/fetchArticles.ts";
 
 export default function customkbConfigurer() {
-  pipe.addStep(async (context) => {
+  pipe.addStep(async (context: any) => {
 
     const articles = await fetchArticles();
 
