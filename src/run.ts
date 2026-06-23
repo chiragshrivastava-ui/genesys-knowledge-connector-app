@@ -35,25 +35,32 @@ async function main() {
     // ✅ Step 2: Push each document
     for (const doc of documents) {
       const response = await fetch(
-        `${process.env.GENESYS_BASE_URL}/api/v2/knowledge/knowledgebases/${process.env.GENESYS_KNOWLEDGE_BASE_ID}/documents`,
+  `${process.env.GENESYS_BASE_URL}/api/v2/knowledge/knowledgebases/${process.env.GENESYS_KNOWLEDGE_BASE_ID}/documents`,
+  {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify({
+      name: doc.title,
+      externalId: doc.externalId,
+      visible: true,
+      language: "en-US",
+
+      variations: [
         {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
-          },
-          body: JSON.stringify({
-            externalId: doc.externalId,
-            title: doc.title,
-            visible: true,
-            language: "en-US",
-            state: "published",
-            content: {
-              body: doc.content.body,
-            },
-          }),
+          name: doc.title,
+          type: "Article",
+          state: "published",   // ✅ THIS IS CRITICAL
+          body: {
+            content: doc.content.body
+          }
         }
-      );
+      ]
+    }),
+  }
+);
 
       const result = await response.json();
 
