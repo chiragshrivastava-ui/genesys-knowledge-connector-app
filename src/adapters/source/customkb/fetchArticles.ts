@@ -15,7 +15,7 @@ export async function fetchArticles() {
     const idMatch = content.match(/ID:\s*(.*)/);
 
     // ✅ Extract TITLE
-    const titleMatch = content.match(/TITLE:\s*(.*)/);
+    const titleMatch = content.match(/TITLE:\s*(.+)/i);
 
     const id = idMatch ? idMatch[1].trim() : file;
     const title = titleMatch ? titleMatch[1].trim() : file;
