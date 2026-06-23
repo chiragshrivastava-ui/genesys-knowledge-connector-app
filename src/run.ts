@@ -27,47 +27,55 @@ async function main() {
     );
 
     const tokenData = await tokenResponse.json();
-
     const accessToken = tokenData.access_token;
 
     console.log("✅ Authenticated with Genesys");
 
     // ✅ Step 2: Push each document
     for (const doc of documents) {
+
       const response = await fetch(
-  `${process.env.GENESYS_BASE_URL}/api/v2/knowledge/knowledgebases/${process.env.GENESYS_KNOWLEDGE_BASE_ID}/documents`,
-  {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${accessToken}`,
-    },
-    body: JSON.stringify({
-      name: doc.title,
-      externalId: doc.externalId,
-      visible: true,
-      language: "en-US",
-
-      variations: [
+        `${process.env.GENESYS_BASE_URL}/api/v2/knowledge/knowledgebases/${process.env.GENESYS_KNOWLEDGE_BASE_ID}/documents`,
         {
-          name: doc.title,
-          type: "Article",
-          state: "published",   // ✅ THIS IS CRITICAL
-          body: {
-            content: doc.content.body
-          }
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify({
+            name: doc.title,
+            externalId: doc.externalId,
+            visible: true,
+            language: "en-US",
+            variations: [
+              {
+                name: doc.title,
+                type: "Article",
+                state: "published",
+                body: {
+                  content: doc.content.body
+                }
+              }
+            ]
+          }),
         }
-      ]
-    }),
-  }
-);
+      );
 
-      const result = await response.json();
+      // ✅ CRITICAL FIX: Read RAW response
+      const responseText = await response.text();
 
-      console.log(`✅ Uploaded: ${doc.title}`);
+      console.log(`📦 RESPONSE for "${doc.title}":`);
+      console.log(responseText);
+
+      // ✅ Extra safety: check status
+      if (!response.ok) {
+        console.error(`❌ Failed for ${doc.title} - Status: ${response.status}`);
+      } else {
+        console.log(`✅ Successfully sent: ${doc.title}`);
+      }
     }
 
-    console.log("✅ All articles pushed to Genesys!");
+    console.log("✅ Process completed");
 
   } catch (error) {
     console.error("❌ Error:", error);
