@@ -46,6 +46,7 @@ async function main() {
             externalId: doc.externalId,
             title: doc.title,
             visible: true,
+            state: "published",
             content: {
               body: doc.content.body,
             },
