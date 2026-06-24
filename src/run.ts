@@ -37,7 +37,12 @@ async function main() {
       try {
         console.log(`\n📌 Processing: ${doc.title}`);
 
-        // ✅ STEP 1: CREATE
+        if (!doc.title) {
+          console.error("❌ Title is missing, skipping...");
+          continue;
+        }
+
+        // ✅ STEP 1: CREATE DOCUMENT
         const createRes = await fetch(
           `${BASE}/api/v2/knowledge/knowledgebases/${KB}/documents`,
           {
@@ -65,7 +70,7 @@ async function main() {
         const createdDoc = JSON.parse(createText);
         const documentId = createdDoc.id;
 
-        // ✅ STEP 2: ADD CONTENT (FIXED CONTENT BLOCK STRUCTURE)
+        // ✅ STEP 2: ADD CONTENT (FIXED BODY STRUCTURE)
         const variationRes = await fetch(
           `${BASE}/api/v2/knowledge/knowledgebases/${KB}/documents/${documentId}/variations`,
           {
@@ -78,17 +83,19 @@ async function main() {
               name: doc.title,
               type: "Article",
               language: "en-US",
-              content: [
-                {
-                  type: "paragraph",
-                  content: [
-                    {
-                      type: "text",
-                      text: doc.content.body
-                    }
-                  ]
-                }
-              ]
+              body: {
+                content: [
+                  {
+                    type: "paragraph",
+                    content: [
+                      {
+                        type: "text",
+                        text: doc.content.body   // ✅ REAL CONTENT HERE
+                      }
+                    ]
+                  }
+                ]
+              }
             })
           }
         );
@@ -129,7 +136,7 @@ async function main() {
         console.log(`✅ DONE: ${doc.title}`);
 
       } catch (err) {
-        console.error("❌ Error processing doc:", err);
+        console.error("❌ Error processing document:", err);
       }
     }
 
@@ -141,4 +148,3 @@ async function main() {
 }
 
 main();
-``
