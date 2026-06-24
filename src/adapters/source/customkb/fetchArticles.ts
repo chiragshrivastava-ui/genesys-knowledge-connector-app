@@ -28,7 +28,7 @@ export async function fetchArticles() {
       }
     }
 
-    // ✅ Extract body (everything after TITLE line)
+    // ✅ Extract body (below TITLE)
     const bodyStartIndex = lines.findIndex(line =>
       line.trim().toUpperCase().startsWith("TITLE:")
     );
@@ -41,16 +41,7 @@ export async function fetchArticles() {
     const article = {
       id,
       title,
-      
-const htmlBody = body
-  .replace(/^## (.*$)/gm, "<h2>$1</h2>")
-  .replace(/^- (.*$)/gm, "<li>$1</li>")
-  .replace(/\n/g, "<br>");
-
-const article = {
-  id,
-  title,
-  content: htmlBody   // ✅ IMPORTANT: plain string (not <pre>, not wrapped)
+      content: body   // ✅ plain text
     };
 
     console.log("✅ PARSED ARTICLE:", JSON.stringify(article, null, 2));
@@ -58,4 +49,3 @@ const article = {
     return article;
   });
 }
-``
