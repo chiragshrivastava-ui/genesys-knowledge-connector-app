@@ -30,8 +30,8 @@ async function main() {
 
     console.log("✅ Authenticated with Genesys");
 
+    // ✅ Loop through documents
     for (const doc of documents) {
-
       const response = await fetch(
         `${process.env.GENESYS_BASE_URL}/api/v2/knowledge/knowledgebases/${process.env.GENESYS_KNOWLEDGE_BASE_ID}/documents`,
         {
@@ -43,7 +43,7 @@ async function main() {
           body: JSON.stringify({
             name: doc.title,
             title: doc.title,
-            externalId: doc.externalId,   // ✅ FIXED HERE
+            externalId: doc.externalId,
             visible: true,
             language: "en-US",
             variations: [
@@ -52,13 +52,34 @@ async function main() {
                 type: "Article",
                 state: "published",
                 body: {
-                  text: doc.content.body   // ✅ FIXED CONTENT ACCESS
-                }
-              }
-            ]
+                  text: doc.content.body,
+                },
+              },
+            ],
           }),
         }
       );
 
       const responseText = await response.text();
 
+      console.log(`📦 RESPONSE for "${doc.title}":`);
+      console.log(responseText);
+
+      if (!response.ok) {
+        console.error(`❌ Failed for ${doc.title} - Status: ${response.status}`);
+        continue;
+      }
+
+      console.log(`✅ Created: ${doc.title}`);
+    }
+
+    console.log("✅ Process completed ✅");
+
+  } catch (error) {
+    console.error("❌ Error:", error);
+    process.exit(1);
+  }
+}
+
+// ✅ MUST be outside function
+main();
