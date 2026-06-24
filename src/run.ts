@@ -33,40 +33,71 @@ async function main() {
 
     console.log("✅ Authenticated");
 
+    // ✅ STEP 1: Fetch existing documents
+    const existingRes = await fetch(
+      `${BASE}/api/v2/knowledge/knowledgebases/${KB}/documents?pageSize=100`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+
+    const existingData = await existingRes.json();
+
+    const existingMap = new Map();
+
+    for (const doc of existingData.entities || []) {
+      if (doc.externalId) {
+        existingMap.set(doc.externalId, doc.id);
+      }
+    }
+
+    console.log("✅ Existing documents loaded:", existingMap.size);
+
     for (const doc of docs) {
       try {
         console.log(`\n📌 Processing: ${doc.title}`);
 
-        // ✅ STEP 1 — CREATE
-        const createRes = await fetch(
-          `${BASE}/api/v2/knowledge/knowledgebases/${KB}/documents`,
-          {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-              name: doc.title,
-              title: doc.title,
-              externalId: doc.externalId,
-              visible: true,
-              language: "en-US"
-            })
+        let documentId;
+
+        // ✅ CHECK DUPLICATE
+        if (existingMap.has(doc.externalId)) {
+          documentId = existingMap.get(doc.externalId);
+          console.log("🔁 Updating existing article:", doc.title);
+        } else {
+          console.log("🆕 Creating new article:", doc.title);
+
+          const createRes = await fetch(
+            `${BASE}/api/v2/knowledge/knowledgebases/${KB}/documents`,
+            {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify({
+                name: doc.title,
+                title: doc.title,
+                externalId: doc.externalId,
+                visible: true,
+                language: "en-US"
+              })
+            }
+          );
+
+          const createData = await createRes.json();
+
+          if (!createRes.ok) {
+            console.error("❌ Create failed", createData);
+            continue;
           }
-        );
 
-        const createText = await createRes.text();
-        console.log("📦 CREATE RESPONSE:");
-        console.log(createText);
+          documentId = createData.id;
+        }
 
-        if (!createRes.ok) continue;
-
-        const createdDoc = JSON.parse(createText);
-        const documentId = createdDoc.id;
-
-        // ✅ ✅ STEP 2 — VARIATION (✅ FINAL CORRECT FORMAT)
-        const variationRes = await fetch(
+        // ✅ ALWAYS UPDATE CONTENT (variation)
+        await fetch(
           `${BASE}/api/v2/knowledge/knowledgebases/${KB}/documents/${documentId}/variations`,
           {
             method: "POST",
@@ -99,17 +130,8 @@ async function main() {
           }
         );
 
-        const variationText = await variationRes.text();
-        console.log("📦 VARIATION RESPONSE:");
-        console.log(variationText);
-
-        if (!variationRes.ok) {
-          console.error("❌ Variation failed");
-          continue;
-        }
-
-        // ✅ STEP 3 — PUBLISH
-        const publishRes = await fetch(
+        // ✅ PUBLISH
+        await fetch(
           `${BASE}/api/v2/knowledge/knowledgebases/${KB}/documents/${documentId}/versions`,
           {
             method: "POST",
@@ -117,24 +139,18 @@ async function main() {
               Authorization: `Bearer ${token}`,
               "Content-Type": "application/json"
             },
-            body: JSON.stringify({
-              state: "Published"
-            })
+            body: JSON.stringify({ state: "Published" })
           }
         );
 
-        const publishText = await publishRes.text();
-        console.log("📦 PUBLISH RESPONSE:");
-        console.log(publishText);
-
-        console.log(`✅ DONE: ${doc.title}`);
+        console.log("✅ Synced:", doc.title);
 
       } catch (err) {
         console.error("❌ Error:", err);
       }
     }
 
-    console.log("\n✅ Process completed");
+    console.log("\n✅ Sync completed");
 
   } catch (err) {
     console.error("❌ Fatal error:", err);
