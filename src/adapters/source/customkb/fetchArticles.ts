@@ -41,7 +41,16 @@ export async function fetchArticles() {
     const article = {
       id,
       title,
-      content: body   // ✅ IMPORTANT: plain string (not <pre>, not wrapped)
+      
+const htmlBody = body
+  .replace(/^## (.*$)/gm, "<h2>$1</h2>")
+  .replace(/^- (.*$)/gm, "<li>$1</li>")
+  .replace(/\n/g, "<br>");
+
+const article = {
+  id,
+  title,
+  content: htmlBody   // ✅ IMPORTANT: plain string (not <pre>, not wrapped)
     };
 
     console.log("✅ PARSED ARTICLE:", JSON.stringify(article, null, 2));
