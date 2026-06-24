@@ -1,16 +1,14 @@
 import customkbConfigurer from "./configurers/customkb";
 const fetch = require("node-fetch");
 
-// ✅ ✅ STRONG NORMALIZATION (FINAL FIX)
+// ✅ SIMPLE NORMALIZATION (now enough)
 function normalize(text: string) {
   if (!text) return "";
 
   return text
     .toLowerCase()
     .replace(/\r?\n/g, " ")
-    .replace(/[#*`>-]/g, "")       // remove markdown symbols
-    .replace(/[^a-z0-9 ]/g, " ")   // remove all special chars
-    .replace(/\s+/g, " ")          // collapse spaces
+    .replace(/\s+/g, " ")
     .trim();
 }
 
@@ -46,7 +44,7 @@ async function main() {
 
     console.log("✅ Authenticated");
 
-    // ✅ FETCH EXISTING DOCUMENTS
+    // ✅ LOAD EXISTING DOCS
     const existingRes = await fetch(
       `${BASE}/api/v2/knowledge/knowledgebases/${KB}/documents?pageSize=100`,
       {
@@ -57,7 +55,6 @@ async function main() {
     );
 
     const existingData = await existingRes.json();
-
     const existingMap = new Map();
 
     for (const doc of existingData.entities || []) {
@@ -68,7 +65,6 @@ async function main() {
 
     console.log("✅ Existing documents loaded:", existingMap.size);
 
-    // ✅ LOOP
     for (const doc of docs) {
       try {
         console.log(`\n📌 Processing: ${doc.title}`);
@@ -100,7 +96,6 @@ async function main() {
           );
 
           const createData = await createRes.json();
-
           if (!createRes.ok) {
             console.error("❌ Create failed", createData);
             continue;
@@ -109,9 +104,9 @@ async function main() {
           documentId = createData.id;
         }
 
-        // ✅ FETCH EXISTING CONTENT
-        const existingDocRes = await fetch(
-          `${BASE}/api/v2/knowledge/knowledgebases/${KB}/documents/${documentId}`,
+        // ✅ ✅ ✅ FIX: FETCH LAST VERSION WITH CONTENT
+        const versionRes = await fetch(
+          `${BASE}/api/v2/knowledge/knowledgebases/${KB}/documents/${documentId}/versions`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -119,20 +114,20 @@ async function main() {
           }
         );
 
-        const existingDoc = await existingDocRes.json();
+        const versionData = await versionRes.json();
 
         let existingText = "";
 
         try {
+          const latest = versionData.entities?.[0];
           existingText =
-            existingDoc.body?.blocks?.[0]?.paragraph?.blocks?.[0]?.text?.text || "";
+            latest?.body?.blocks?.[0]?.paragraph?.blocks?.[0]?.text?.text || "";
         } catch {
           existingText = "";
         }
 
         const newText = doc.content.body;
 
-        // ✅ ✅ FINAL COMPARISON
         const normalizedExisting = normalize(existingText);
         const normalizedNew = normalize(newText);
 
@@ -141,13 +136,13 @@ async function main() {
         console.log("New     :", normalizedNew);
 
         if (normalizedExisting === normalizedNew) {
-          console.log("⏭️ No changes detected → SKIPPING ✅");
+          console.log("⏭️ No changes → SKIP ✅");
           continue;
         }
 
         console.log("✏️ Change detected → updating");
 
-        // ✅ UPDATE CONTENT
+        // ✅ UPDATE
         await fetch(
           `${BASE}/api/v2/knowledge/knowledgebases/${KB}/documents/${documentId}/variations`,
           {
@@ -201,7 +196,7 @@ async function main() {
       }
     }
 
-    console.log("\n✅ Sync completed");
+    console.log("\n✅ DONE - PERFECT SYNC");
 
   } catch (err) {
     console.error("❌ Fatal error:", err);
@@ -209,4 +204,3 @@ async function main() {
 }
 
 main();
-``
