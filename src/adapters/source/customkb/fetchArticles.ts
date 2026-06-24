@@ -37,10 +37,10 @@ export async function fetchArticles() {
         : "";
 
     return {
-      externalId,   // ✅ IMPORTANT
+      externalId,
       title,
       content: {
-        body         // ✅ maintain structure
+        body
       }
     };
   });
