@@ -12,41 +12,35 @@ export async function fetchArticles() {
 
     const lines = content.split(/\r?\n/);
 
-    let externalId: string | null = null;
-    let title: string | null = null;
+    let externalId: string = "";
+    let title: string = "";
 
-    // ✅ SAFE parsing
     for (const line of lines) {
       const trimmed = line.trim();
 
-      if (trimmed.toUpperCase().startsWith("ID:")) {
-        externalId = trimmed.split(":")[1]?.trim();
+      if (trimmed.startsWith("ID:")) {
+        externalId = trimmed.replace("ID:", "").trim();
       }
 
-      if (trimmed.toUpperCase().startsWith("TITLE:")) {
-        title = trimmed.split(":").slice(1).join(":").trim();
+      if (trimmed.startsWith("TITLE:")) {
+        title = trimmed.replace("TITLE:", "").trim();
       }
     }
 
-    const bodyStartIndex = lines.findIndex(line =>
-      line.trim().toUpperCase().startsWith("TITLE:")
-    );
+    const titleIndex = lines.findIndex(l => l.trim().startsWith("TITLE:"));
 
     const body =
-      bodyStartIndex !== -1
-        ? lines.slice(bodyStartIndex + 1).join("\n").trim()
+      titleIndex !== -1
+        ? lines.slice(titleIndex + 1).join("\n").trim()
         : "";
-
-    if (!title) {
-      console.error(`❌ Missing TITLE in file: ${file}`);
-    }
 
     return {
       externalId,
       title,
       content: {
-        body,
-      },
+        body
+      }
     };
   });
 }
+``
