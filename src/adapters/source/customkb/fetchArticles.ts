@@ -12,15 +12,14 @@ export async function fetchArticles() {
 
     const lines = content.split(/\r?\n/);
 
-    let id: string | null = null;
+    let externalId: string | null = null;
     let title: string | null = null;
 
-    // ✅ Extract ID and TITLE
     for (const line of lines) {
       const trimmed = line.trim();
 
       if (trimmed.toUpperCase().startsWith("ID:")) {
-        id = trimmed.substring(3).trim();
+        externalId = trimmed.substring(3).trim();
       }
 
       if (trimmed.toUpperCase().startsWith("TITLE:")) {
@@ -28,7 +27,6 @@ export async function fetchArticles() {
       }
     }
 
-    // ✅ Extract body (below TITLE)
     const bodyStartIndex = lines.findIndex(line =>
       line.trim().toUpperCase().startsWith("TITLE:")
     );
@@ -38,14 +36,12 @@ export async function fetchArticles() {
         ? lines.slice(bodyStartIndex + 1).join("\n").trim()
         : "";
 
-    const article = {
-      id,
+    return {
+      externalId,   // ✅ IMPORTANT
       title,
-      content: body   // ✅ plain text
+      content: {
+        body         // ✅ maintain structure
+      }
     };
-
-    console.log("✅ PARSED ARTICLE:", JSON.stringify(article, null, 2));
-
-    return article;
   });
 }
