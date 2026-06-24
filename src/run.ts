@@ -8,7 +8,7 @@ async function main() {
     const documents = await customkbConfigurer();
     console.log(`✅ Documents fetched: ${documents.length}`);
 
-    // ✅ OAuth
+    // ✅ STEP 1: Get OAuth token
     const tokenResponse = await fetch(
       `${process.env.GENESYS_LOGIN_URL}/oauth/token`,
       {
@@ -28,52 +28,78 @@ async function main() {
     const tokenData = await tokenResponse.json();
     const accessToken = tokenData.access_token;
 
-    console.log("✅ Authenticated with Genesys");
+    const BASE = process.env.GENESYS_BASE_URL;
+    const KB = process.env.GENESYS_KNOWLEDGE_BASE_ID;
 
-    // ✅ Loop through documents
+    console.log("✅ Authenticated");
+
     for (const doc of documents) {
-      const response = await fetch(
-        `${process.env.GENESYS_BASE_URL}/api/v2/knowledge/knowledgebases/${process.env.GENESYS_KNOWLEDGE_BASE_ID}/documents`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
-          },
-          body: JSON.stringify({
-            name: doc.title,
-            title: doc.title,
-            externalId: doc.externalId,
-            visible: true,
-            language: "en-US",
-            variations: [
-              {
-                name: doc.title,
-                type: "Article",
-                state: "published",
-                body: {
-                  text: doc.content.body,
-                },
-              },
-            ],
-          }),
-        }
-      );
+      try {
+        // ✅ STEP 2: CREATE DOCUMENT
+        const createRes = await fetch(
+          `${BASE}/api/v2/knowledge/knowledgebases/${KB}/documents`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              name: doc.title,
+              externalId: doc.externalId,
+              visible: true,
+              language: "en-US"
+            }),
+          }
+        );
 
-      const responseText = await response.text();
+        const createdDoc = await createRes.json();
+        const documentId = createdDoc.id;
 
-      console.log(`📦 RESPONSE for "${doc.title}":`);
-      console.log(responseText);
+        console.log(`✅ Created: ${doc.title}`);
 
-      if (!response.ok) {
-        console.error(`❌ Failed for ${doc.title} - Status: ${response.status}`);
-        continue;
+        // ✅ STEP 3: ADD CONTENT (Variation API)
+        await fetch(
+          `${BASE}/api/v2/knowledge/knowledgebases/${KB}/documents/${documentId}/variations`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              name: doc.title,
+              type: "Article",
+              body: {
+                text: doc.content.body   // ✅ THIS FIXES EMPTY CONTENT
+              }
+            }),
+          }
+        );
+
+        console.log(`✅ Content added: ${doc.title}`);
+
+        // ✅ STEP 4: PUBLISH (Versions API)
+        await fetch(
+          `${BASE}/api/v2/knowledge/knowledgebases/${KB}/documents/${documentId}/versions`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              "Content-Type": "application/json",
+            },
+            body: "{}"
+          }
+        );
+
+        console.log(`✅ Published: ${doc.title}`);
+
+      } catch (err) {
+        console.error(`❌ Failed for ${doc.title}`, err);
       }
-
-      console.log(`✅ Created: ${doc.title}`);
     }
 
-    console.log("✅ Process completed ✅");
+    console.log("✅ Process completed");
 
   } catch (error) {
     console.error("❌ Error:", error);
@@ -81,5 +107,5 @@ async function main() {
   }
 }
 
-// ✅ MUST be outside function
 main();
+``
