@@ -53,7 +53,7 @@ async function main() {
                 type: "Article",
                 state: "published",
                 body: {
-                  text: doc.content   // ✅ ✅ CRITICAL FIX
+                  content: `<p>${doc.content}</p>`   // ✅ ✅ CRITICAL FIX
                 }
               }
             ]
