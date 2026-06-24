@@ -37,7 +37,12 @@ async function main() {
       try {
         console.log(`\n📌 Processing: ${doc.title}`);
 
-        // ✅ STEP 1 — CREATE DOCUMENT
+        if (!doc.title) {
+          console.error("❌ Title is NULL, skipping");
+          continue;
+        }
+
+        // ✅ 1. CREATE DOCUMENT
         const createRes = await fetch(
           `${BASE}/api/v2/knowledge/knowledgebases/${KB}/documents`,
           {
@@ -48,9 +53,10 @@ async function main() {
             },
             body: JSON.stringify({
               name: doc.title,
+              title: doc.title,
               externalId: doc.externalId,
               visible: true,
-              language: "en-US"
+              language: "en-US",
             }),
           }
         );
@@ -67,7 +73,7 @@ async function main() {
         const createdDoc = JSON.parse(createText);
         const documentId = createdDoc.id;
 
-        // ✅ STEP 2 — ADD CONTENT
+        // ✅ 2. ADD CONTENT (VARIATION)
         const variationRes = await fetch(
           `${BASE}/api/v2/knowledge/knowledgebases/${KB}/documents/${documentId}/variations`,
           {
@@ -81,8 +87,8 @@ async function main() {
               type: "Article",
               language: "en-US",
               body: {
-                text: doc.content.body   // ✅ CONTENT IMPORTANT
-              }
+                text: doc.content.body,
+              },
             }),
           }
         );
@@ -96,7 +102,7 @@ async function main() {
           continue;
         }
 
-        // ✅ STEP 3 — PUBLISH
+        // ✅ 3. PUBLISH (VERSION)
         const publishRes = await fetch(
           `${BASE}/api/v2/knowledge/knowledgebases/${KB}/documents/${documentId}/versions`,
           {
@@ -106,8 +112,8 @@ async function main() {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              state: "Published"
-            })
+              state: "Published",
+            }),
           }
         );
 
@@ -123,14 +129,14 @@ async function main() {
         console.log(`✅ DONE: ${doc.title}`);
 
       } catch (err) {
-        console.error(`❌ Error processing ${doc.title}`, err);
+        console.error(`❌ Error for ${doc.title}`, err);
       }
     }
 
     console.log("\n✅ Process completed");
 
   } catch (error) {
-    console.error("❌ Fatal Error:", error);
+    console.error("❌ Fatal error:", error);
     process.exit(1);
   }
 }
