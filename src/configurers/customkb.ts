@@ -7,7 +7,7 @@ export default async function customkbConfigurer() {
     externalId: article.externalId,
     title: article.title,
     content: {
-      body: article.content.body
-    }
+      body: article.content.body,
+    },
   }));
 }
