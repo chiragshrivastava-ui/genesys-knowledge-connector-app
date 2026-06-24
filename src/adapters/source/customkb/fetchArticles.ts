@@ -8,9 +8,9 @@ export async function fetchArticles() {
 
   return files.map(file => {
     const filePath = path.join(dir, file);
-    const content = fs.readFileSync(filePath, "utf-8");
+    const fileContent = fs.readFileSync(filePath, "utf-8");
 
-    const lines = content.split(/\r?\n/);
+    const lines = fileContent.split(/\r?\n/);
 
     let externalId: string | null = null;
     let title: string | null = null;
