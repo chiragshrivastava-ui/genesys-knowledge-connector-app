@@ -32,7 +32,6 @@ async function main() {
 
     // ✅ STEP 2: Create documents
     for (const doc of documents) {
-
       const response = await fetch(
         `${process.env.GENESYS_BASE_URL}/api/v2/knowledge/knowledgebases/${process.env.GENESYS_KNOWLEDGE_BASE_ID}/documents`,
         {
@@ -44,7 +43,7 @@ async function main() {
           body: JSON.stringify({
             name: doc.title,
             title: doc.title,
-            externalId: doc.externalId,
+            externalId: doc.id,
             visible: true,
             language: "en-US",
             variations: [
@@ -53,7 +52,7 @@ async function main() {
                 type: "Article",
                 state: "published",
                 body: {
-                  content: `<p>${doc.content}</p>`   // ✅ ✅ CRITICAL FIX
+                  text: doc.content   // ✅ ✅ CRITICAL FIX
                 }
               }
             ]
@@ -83,3 +82,4 @@ async function main() {
 }
 
 main();
+``
