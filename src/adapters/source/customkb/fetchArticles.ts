@@ -10,12 +10,12 @@ export async function fetchArticles() {
     const filePath = path.join(dir, file);
     const content = fs.readFileSync(filePath, "utf-8");
 
-    const lines = content.split(/\r?\n/); // ✅ handles Windows + Linux
+    const lines = content.split(/\r?\n/);
 
     let id: string | null = null;
     let title: string | null = null;
 
-    // ✅ Extract ID and TITLE safely
+    // ✅ Extract ID and TITLE
     for (const line of lines) {
       const trimmed = line.trim();
 
@@ -28,7 +28,7 @@ export async function fetchArticles() {
       }
     }
 
-    // ✅ Extract body (everything after TITLE)
+    // ✅ Extract body (everything after TITLE line)
     const bodyStartIndex = lines.findIndex(line =>
       line.trim().toUpperCase().startsWith("TITLE:")
     );
@@ -41,7 +41,7 @@ export async function fetchArticles() {
     const article = {
       id,
       title,
-      content: `<pre>${body}</pre>`
+      content: body   // ✅ IMPORTANT: plain string (not <pre>, not wrapped)
     };
 
     console.log("✅ PARSED ARTICLE:", JSON.stringify(article, null, 2));
@@ -49,3 +49,4 @@ export async function fetchArticles() {
     return article;
   });
 }
+``
