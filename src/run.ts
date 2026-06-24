@@ -37,7 +37,7 @@ async function main() {
       try {
         console.log(`\n📌 Processing: ${doc.title}`);
 
-        // ✅ CREATE
+        // ✅ STEP 1 — CREATE
         const createRes = await fetch(
           `${BASE}/api/v2/knowledge/knowledgebases/${KB}/documents`,
           {
@@ -57,14 +57,15 @@ async function main() {
         );
 
         const createText = await createRes.text();
-        console.log("📦 CREATE RESPONSE:", createText);
+        console.log("📦 CREATE RESPONSE:");
+        console.log(createText);
 
         if (!createRes.ok) continue;
 
         const createdDoc = JSON.parse(createText);
         const documentId = createdDoc.id;
 
-        // ✅ ✅ VARIATION (FINAL FIX WITH doc TYPE)
+        // ✅ ✅ STEP 2 — VARIATION (✅ FINAL CORRECT FORMAT)
         const variationRes = await fetch(
           `${BASE}/api/v2/knowledge/knowledgebases/${KB}/documents/${documentId}/variations`,
           {
@@ -78,31 +79,36 @@ async function main() {
               type: "Article",
               language: "en-US",
               body: {
-                content: {
-                  type: "doc",
-                  content: [
-                    {
-                      type: "paragraph",
-                      content: [
+                blocks: [
+                  {
+                    type: "Paragraph",
+                    paragraph: {
+                      blocks: [
                         {
-                          type: "text",
-                          text: doc.content.body
+                          type: "Text",
+                          text: {
+                            text: doc.content.body
+                          }
                         }
                       ]
                     }
-                  ]
-                }
+                  }
+                ]
               }
             })
           }
         );
 
         const variationText = await variationRes.text();
-        console.log("📦 VARIATION RESPONSE:", variationText);
+        console.log("📦 VARIATION RESPONSE:");
+        console.log(variationText);
 
-        if (!variationRes.ok) continue;
+        if (!variationRes.ok) {
+          console.error("❌ Variation failed");
+          continue;
+        }
 
-        // ✅ PUBLISH
+        // ✅ STEP 3 — PUBLISH
         const publishRes = await fetch(
           `${BASE}/api/v2/knowledge/knowledgebases/${KB}/documents/${documentId}/versions`,
           {
@@ -111,12 +117,15 @@ async function main() {
               Authorization: `Bearer ${token}`,
               "Content-Type": "application/json"
             },
-            body: JSON.stringify({ state: "Published" })
+            body: JSON.stringify({
+              state: "Published"
+            })
           }
         );
 
         const publishText = await publishRes.text();
-        console.log("📦 PUBLISH RESPONSE:", publishText);
+        console.log("📦 PUBLISH RESPONSE:");
+        console.log(publishText);
 
         console.log(`✅ DONE: ${doc.title}`);
 
