@@ -5,10 +5,10 @@ async function main() {
   try {
     console.log("🚀 Starting connector...");
 
-    const documents = await customkbConfigurer();
-    console.log(`✅ Documents fetched: ${documents.length}`);
+    const docs = await customkbConfigurer();
+    console.log(`✅ Documents fetched: ${docs.length}`);
 
-    // ✅ STEP 1: Get OAuth token
+    // ✅ AUTH
     const tokenResponse = await fetch(
       `${process.env.GENESYS_LOGIN_URL}/oauth/token`,
       {
@@ -33,9 +33,11 @@ async function main() {
 
     console.log("✅ Authenticated");
 
-    for (const doc of documents) {
+    for (const doc of docs) {
       try {
-        // ✅ STEP 2: CREATE DOCUMENT
+        console.log(`\n📌 Processing: ${doc.title}`);
+
+        // ✅ STEP 1 — CREATE DOCUMENT
         const createRes = await fetch(
           `${BASE}/api/v2/knowledge/knowledgebases/${KB}/documents`,
           {
@@ -53,13 +55,20 @@ async function main() {
           }
         );
 
-        const createdDoc = await createRes.json();
+        const createText = await createRes.text();
+        console.log("📦 CREATE RESPONSE:");
+        console.log(createText);
+
+        if (!createRes.ok) {
+          console.error("❌ Create failed");
+          continue;
+        }
+
+        const createdDoc = JSON.parse(createText);
         const documentId = createdDoc.id;
 
-        console.log(`✅ Created: ${doc.title}`);
-
-        // ✅ STEP 3: ADD CONTENT (Variation API)
-        await fetch(
+        // ✅ STEP 2 — ADD CONTENT
+        const variationRes = await fetch(
           `${BASE}/api/v2/knowledge/knowledgebases/${KB}/documents/${documentId}/variations`,
           {
             method: "POST",
@@ -70,17 +79,25 @@ async function main() {
             body: JSON.stringify({
               name: doc.title,
               type: "Article",
+              language: "en-US",
               body: {
-                text: doc.content.body   // ✅ THIS FIXES EMPTY CONTENT
+                text: doc.content.body   // ✅ CONTENT IMPORTANT
               }
             }),
           }
         );
 
-        console.log(`✅ Content added: ${doc.title}`);
+        const variationText = await variationRes.text();
+        console.log("📦 VARIATION RESPONSE:");
+        console.log(variationText);
 
-        // ✅ STEP 4: PUBLISH (Versions API)
-        await fetch(
+        if (!variationRes.ok) {
+          console.error("❌ Variation failed");
+          continue;
+        }
+
+        // ✅ STEP 3 — PUBLISH
+        const publishRes = await fetch(
           `${BASE}/api/v2/knowledge/knowledgebases/${KB}/documents/${documentId}/versions`,
           {
             method: "POST",
@@ -88,24 +105,34 @@ async function main() {
               Authorization: `Bearer ${accessToken}`,
               "Content-Type": "application/json",
             },
-            body: "{}"
+            body: JSON.stringify({
+              state: "Published"
+            })
           }
         );
 
-        console.log(`✅ Published: ${doc.title}`);
+        const publishText = await publishRes.text();
+        console.log("📦 PUBLISH RESPONSE:");
+        console.log(publishText);
+
+        if (!publishRes.ok) {
+          console.error("❌ Publish failed");
+          continue;
+        }
+
+        console.log(`✅ DONE: ${doc.title}`);
 
       } catch (err) {
-        console.error(`❌ Failed for ${doc.title}`, err);
+        console.error(`❌ Error processing ${doc.title}`, err);
       }
     }
 
-    console.log("✅ Process completed");
+    console.log("\n✅ Process completed");
 
   } catch (error) {
-    console.error("❌ Error:", error);
+    console.error("❌ Fatal Error:", error);
     process.exit(1);
   }
 }
 
 main();
-``
