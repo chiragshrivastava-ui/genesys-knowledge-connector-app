@@ -8,12 +8,12 @@ export async function fetchArticles() {
 
   return files.map(file => {
     const filePath = path.join(dir, file);
-    const content = fs.readFileSync(filePath, "utf-8");
+    const fileContent = fs.readFileSync(filePath, "utf-8");
 
-    const lines = content.split(/\r?\n/);
+    const lines = fileContent.split(/\r?\n/);
 
-    let externalId: string = "";
-    let title: string = "";
+    let externalId = "";
+    let title = "";
 
     for (const line of lines) {
       const trimmed = line.trim();
@@ -27,7 +27,7 @@ export async function fetchArticles() {
       }
     }
 
-    const titleIndex = lines.findIndex(l => l.trim().startsWith("TITLE:"));
+    const titleIndex = lines.findIndex(l => l.startsWith("TITLE:"));
 
     const body =
       titleIndex !== -1
@@ -38,9 +38,8 @@ export async function fetchArticles() {
       externalId,
       title,
       content: {
-        body
-      }
+        body,
+      },
     };
   });
 }
-``
