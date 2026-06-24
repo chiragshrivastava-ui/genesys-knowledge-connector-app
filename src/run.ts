@@ -26,7 +26,7 @@ async function main() {
     );
 
     const tokenData = await tokenResponse.json();
-    const accessToken = tokenData.access_token;
+    const token = tokenData.access_token;
 
     const BASE = process.env.GENESYS_BASE_URL;
     const KB = process.env.GENESYS_KNOWLEDGE_BASE_ID;
@@ -37,27 +37,22 @@ async function main() {
       try {
         console.log(`\n📌 Processing: ${doc.title}`);
 
-        if (!doc.title) {
-          console.error("❌ Title is NULL, skipping");
-          continue;
-        }
-
-        // ✅ 1. CREATE DOCUMENT
+        // ✅ STEP 1: CREATE
         const createRes = await fetch(
           `${BASE}/api/v2/knowledge/knowledgebases/${KB}/documents`,
           {
             method: "POST",
             headers: {
-              Authorization: `Bearer ${accessToken}`,
-              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json"
             },
             body: JSON.stringify({
               name: doc.title,
               title: doc.title,
               externalId: doc.externalId,
               visible: true,
-              language: "en-US",
-            }),
+              language: "en-US"
+            })
           }
         );
 
@@ -65,31 +60,36 @@ async function main() {
         console.log("📦 CREATE RESPONSE:");
         console.log(createText);
 
-        if (!createRes.ok) {
-          console.error("❌ Create failed");
-          continue;
-        }
+        if (!createRes.ok) continue;
 
         const createdDoc = JSON.parse(createText);
         const documentId = createdDoc.id;
 
-        // ✅ 2. ADD CONTENT (VARIATION)
+        // ✅ STEP 2: ADD CONTENT (FIXED CONTENT BLOCK STRUCTURE)
         const variationRes = await fetch(
           `${BASE}/api/v2/knowledge/knowledgebases/${KB}/documents/${documentId}/variations`,
           {
             method: "POST",
             headers: {
-              Authorization: `Bearer ${accessToken}`,
-              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json"
             },
             body: JSON.stringify({
               name: doc.title,
               type: "Article",
               language: "en-US",
-              body: {
-                text: doc.content.body,
-              },
-            }),
+              content: [
+                {
+                  type: "paragraph",
+                  content: [
+                    {
+                      type: "text",
+                      text: doc.content.body
+                    }
+                  ]
+                }
+              ]
+            })
           }
         );
 
@@ -102,18 +102,18 @@ async function main() {
           continue;
         }
 
-        // ✅ 3. PUBLISH (VERSION)
+        // ✅ STEP 3: PUBLISH
         const publishRes = await fetch(
           `${BASE}/api/v2/knowledge/knowledgebases/${KB}/documents/${documentId}/versions`,
           {
             method: "POST",
             headers: {
-              Authorization: `Bearer ${accessToken}`,
-              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json"
             },
             body: JSON.stringify({
-              state: "Published",
-            }),
+              state: "Published"
+            })
           }
         );
 
@@ -129,16 +129,16 @@ async function main() {
         console.log(`✅ DONE: ${doc.title}`);
 
       } catch (err) {
-        console.error(`❌ Error for ${doc.title}`, err);
+        console.error("❌ Error processing doc:", err);
       }
     }
 
     console.log("\n✅ Process completed");
 
-  } catch (error) {
-    console.error("❌ Fatal error:", error);
-    process.exit(1);
+  } catch (err) {
+    console.error("❌ Fatal error:", err);
   }
 }
 
 main();
+``
