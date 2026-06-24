@@ -1,13 +1,16 @@
 import customkbConfigurer from "./configurers/customkb";
 const fetch = require("node-fetch");
 
-// ✅ ✅ NORMALIZATION FUNCTION
-function normalize(text) {
+// ✅ ✅ STRONG NORMALIZATION (FINAL FIX)
+function normalize(text: string) {
   if (!text) return "";
 
   return text
-    .replace(/\r?\n/g, " ")   // remove new lines
-    .replace(/\s+/g, " ")     // collapse spaces
+    .toLowerCase()
+    .replace(/\r?\n/g, " ")
+    .replace(/[#*`>-]/g, "")       // remove markdown symbols
+    .replace(/[^a-z0-9 ]/g, " ")   // remove all special chars
+    .replace(/\s+/g, " ")          // collapse spaces
     .trim();
 }
 
@@ -65,7 +68,7 @@ async function main() {
 
     console.log("✅ Existing documents loaded:", existingMap.size);
 
-    // ✅ PROCESS EACH DOC
+    // ✅ LOOP
     for (const doc of docs) {
       try {
         console.log(`\n📌 Processing: ${doc.title}`);
@@ -118,21 +121,31 @@ async function main() {
 
         const existingDoc = await existingDocRes.json();
 
-        const existingText =
-          existingDoc.body?.blocks?.[0]?.paragraph?.blocks?.[0]?.text?.text || "";
+        let existingText = "";
+
+        try {
+          existingText =
+            existingDoc.body?.blocks?.[0]?.paragraph?.blocks?.[0]?.text?.text || "";
+        } catch {
+          existingText = "";
+        }
 
         const newText = doc.content.body;
 
-        // ✅ NORMALIZED COMPARISON (FIXED)
+        // ✅ ✅ FINAL COMPARISON
         const normalizedExisting = normalize(existingText);
         const normalizedNew = normalize(newText);
 
+        console.log("🔍 Compare:");
+        console.log("Existing:", normalizedExisting);
+        console.log("New     :", normalizedNew);
+
         if (normalizedExisting === normalizedNew) {
-          console.log("⏭️ No changes detected, skipping");
+          console.log("⏭️ No changes detected → SKIPPING ✅");
           continue;
         }
 
-        console.log("✏️ Content changed, updating");
+        console.log("✏️ Change detected → updating");
 
         // ✅ UPDATE CONTENT
         await fetch(
@@ -168,7 +181,7 @@ async function main() {
           }
         );
 
-        // ✅ PUBLISH ONLY IF UPDATED
+        // ✅ PUBLISH
         await fetch(
           `${BASE}/api/v2/knowledge/knowledgebases/${KB}/documents/${documentId}/versions`,
           {
@@ -196,3 +209,4 @@ async function main() {
 }
 
 main();
+``
