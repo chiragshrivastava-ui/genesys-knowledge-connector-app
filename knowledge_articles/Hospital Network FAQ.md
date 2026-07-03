@@ -1,3 +1,6 @@
+ID: 3
+TITLE: Hospital Network FAQ
+
 Overview 
 
 Network hospitals are healthcare facilities that have established agreements with the insurer or Third-Party Administrator (TPA) to offer cashless treatment services. These relationships simplify the treatment and billing process for customers while helping ensure efficient claims management. 
