@@ -1,3 +1,6 @@
+ID: 1
+TITLE: Claim Submission Process
+
 Overview 
 
 The claim submission process is a structured workflow through which policyholders request reimbursement or settlement of medical expenses incurred during treatment. The purpose of this process is to ensure that eligible medical expenses are reviewed, validated, and settled according to the terms and conditions defined in the insurance policy. A well-defined claim process helps improve customer satisfaction, reduce claim disputes, and ensure timely payment of approved claims. 
