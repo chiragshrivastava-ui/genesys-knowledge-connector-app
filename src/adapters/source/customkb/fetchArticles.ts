@@ -7,10 +7,12 @@ export async function fetchArticles() {
   const files = fs.readdirSync(dir).filter(file => file.endsWith(".md"));
 
   return files.map(file => {
-    const filePath = path.join(dir, file);
-    const fileContent = fs.readFileSync(filePath, "utf-8");
+    const content = fs.readFileSync(
+      path.join(dir, file),
+      "utf-8"
+    );
 
-    const lines = fileContent.split(/\r?\n/);
+    const lines = content.split(/\r?\n/);
 
     let externalId = "";
     let title = "";
@@ -27,7 +29,9 @@ export async function fetchArticles() {
       }
     }
 
-    const titleIndex = lines.findIndex(l => l.startsWith("TITLE:"));
+    const titleIndex = lines.findIndex(line =>
+      line.trim().startsWith("TITLE:")
+    );
 
     const body =
       titleIndex !== -1
@@ -38,8 +42,8 @@ export async function fetchArticles() {
       externalId,
       title,
       content: {
-        body,
-      },
+        body
+      }
     };
   });
 }
