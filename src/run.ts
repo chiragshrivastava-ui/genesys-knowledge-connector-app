@@ -56,8 +56,7 @@ async function main() {
       {
         method: "POST",
         headers: {
-          "Content-Type":
-            "application/x-www-form-urlencoded",
+          "Content-Type": "application/x-www-form-urlencoded",
           Authorization:
             "Basic " +
             Buffer.from(
@@ -76,7 +75,7 @@ async function main() {
 
     console.log("✅ Authenticated");
 
-    // Load existing documents
+    // Load existing Genesys articles
     const existingRes = await fetch(
       `${BASE}/api/v2/knowledge/knowledgebases/${KB}/documents?pageSize=100`,
       {
@@ -91,10 +90,7 @@ async function main() {
     const existingMap = new Map();
 
     for (const item of existingData.entities || []) {
-      existingMap.set(
-        item.externalId,
-        item.id
-      );
+      existingMap.set(item.externalId, item.id);
     }
 
     console.log(
@@ -105,12 +101,11 @@ async function main() {
       try {
         console.log(`\n📌 Processing: ${doc.title}`);
 
-        let documentId;
-
-        // ====================================
-        // CREATE IF NOT EXISTS
-        // ====================================
+        // ===========================================
+        // NEW ARTICLE
+        // ===========================================
         if (!existingMap.has(doc.externalId)) {
+
           console.log("🆕 Creating new article");
 
           const createRes = await fetch(
@@ -119,8 +114,7 @@ async function main() {
               method: "POST",
               headers: {
                 Authorization: `Bearer ${token}`,
-                "Content-Type":
-                  "application/json"
+                "Content-Type": "application/json"
               },
               body: JSON.stringify({
                 title: doc.title,
@@ -130,33 +124,105 @@ async function main() {
             }
           );
 
-          const createdDoc = await createRes.json();
+          const createData = await createRes.json();
 
           if (!createRes.ok) {
             console.error(
               "❌ Create failed",
-              createdDoc
+              createData
             );
             continue;
           }
 
-          documentId = createdDoc.id;
+          const documentId = createData.id;
+
+          console.log(`✅ Created: ${doc.title}`);
+
+          // Create Variation
+          const variationRes = await fetch(
+            `${BASE}/api/v2/knowledge/knowledgebases/${KB}/documents/${documentId}/variations`,
+            {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify({
+                body: {
+                  blocks: [
+                    {
+                      type: "Paragraph",
+                      paragraph: {
+                        blocks: [
+                          {
+                            type: "Text",
+                            text: {
+                              text: doc.content.body
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              })
+            }
+          );
+
+          const variationData =
+            await variationRes.json();
+
+          if (!variationRes.ok) {
+            console.error(
+              "❌ Variation failed",
+              variationData
+            );
+            continue;
+          }
 
           console.log(
-            `✅ Created: ${doc.title}`
+            `✅ Content Added: ${doc.title}`
           );
-        } else {
-          documentId =
-            existingMap.get(doc.externalId);
+
+          // Publish
+          const publishRes = await fetch(
+            `${BASE}/api/v2/knowledge/knowledgebases/${KB}/documents/${documentId}/versions`,
+            {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify({})
+            }
+          );
+
+          const publishData =
+            await publishRes.json();
+
+          if (!publishRes.ok) {
+            console.error(
+              "❌ Publish failed",
+              publishData
+            );
+            continue;
+          }
 
           console.log(
-            "🔁 Existing article found"
+            `✅ Published: ${doc.title}`
           );
+
+          continue;
         }
 
-        // ====================================
-        // GET LATEST VERSION
-        // ====================================
+        // ===========================================
+        // EXISTING ARTICLE
+        // ===========================================
+        const documentId =
+          existingMap.get(doc.externalId);
+
+        console.log("🔁 Existing article found");
+
         const versionRes = await fetch(
           `${BASE}/api/v2/knowledge/knowledgebases/${KB}/documents/${documentId}/versions`,
           {
@@ -179,9 +245,6 @@ async function main() {
           continue;
         }
 
-        // ====================================
-        // GET CURRENT CONTENT
-        // ====================================
         const variationRes = await fetch(
           `${BASE}/api/v2/knowledge/knowledgebases/${KB}/documents/${documentId}/versions/${versionId}/variations`,
           {
@@ -219,17 +282,14 @@ async function main() {
           "✏️ Content changed. Updating."
         );
 
-        // ====================================
-        // UPDATE CONTENT
-        // ====================================
+        // Update content
         await fetch(
           `${BASE}/api/v2/knowledge/knowledgebases/${KB}/documents/${documentId}/variations`,
           {
             method: "POST",
             headers: {
               Authorization: `Bearer ${token}`,
-              "Content-Type":
-                "application/json"
+              "Content-Type": "application/json"
             },
             body: JSON.stringify({
               body: {
@@ -253,17 +313,13 @@ async function main() {
           }
         );
 
-        // ====================================
-        // PUBLISH
-        // ====================================
         await fetch(
           `${BASE}/api/v2/knowledge/knowledgebases/${KB}/documents/${documentId}/versions`,
           {
             method: "POST",
             headers: {
               Authorization: `Bearer ${token}`,
-              "Content-Type":
-                "application/json"
+              "Content-Type": "application/json"
             },
             body: JSON.stringify({})
           }
@@ -284,7 +340,10 @@ async function main() {
     console.log("\n✅ Sync Completed");
 
   } catch (err) {
-    console.error("❌ Fatal error:", err);
+    console.error(
+      "❌ Fatal error:",
+      err
+    );
   }
 }
 
