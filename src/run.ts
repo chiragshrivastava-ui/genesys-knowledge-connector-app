@@ -1,4 +1,4 @@
-import customkbConfigurer from "./configurers/customkb";
+  import customkbConfigurer from "./configurers/customkb";
 const fetch = require("node-fetch");
 
 function normalize(text: string) {
@@ -138,7 +138,9 @@ async function main() {
 
           console.log(`✅ Created: ${doc.title}`);
 
-          // Create Variation
+          const variationName =
+            `${doc.title} - v1`;
+
           const variationRes = await fetch(
             `${BASE}/api/v2/knowledge/knowledgebases/${KB}/documents/${documentId}/variations`,
             {
@@ -148,6 +150,7 @@ async function main() {
                 "Content-Type": "application/json"
               },
               body: JSON.stringify({
+                name: variationName,
                 body: {
                   blocks: [
                     {
@@ -181,10 +184,9 @@ async function main() {
           }
 
           console.log(
-            `✅ Content Added: ${doc.title}`
+            `✅ Content Added: ${variationName}`
           );
 
-          // Publish
           const publishRes = await fetch(
             `${BASE}/api/v2/knowledge/knowledgebases/${KB}/documents/${documentId}/versions`,
             {
@@ -257,6 +259,12 @@ async function main() {
         const variationData =
           await variationRes.json();
 
+        const variationCount =
+          variationData.entities?.length || 0;
+
+        const variationName =
+          `${doc.title} - v${variationCount + 1}`;
+
         const genesysContent =
           extractVariationText(
             variationData
@@ -279,10 +287,9 @@ async function main() {
         }
 
         console.log(
-          "✏️ Content changed. Updating."
+          `✏️ Content changed. Creating ${variationName}`
         );
 
-        // Update content
         await fetch(
           `${BASE}/api/v2/knowledge/knowledgebases/${KB}/documents/${documentId}/variations`,
           {
@@ -292,6 +299,7 @@ async function main() {
               "Content-Type": "application/json"
             },
             body: JSON.stringify({
+              name: variationName,
               body: {
                 blocks: [
                   {
@@ -326,7 +334,7 @@ async function main() {
         );
 
         console.log(
-          "✅ Updated & Published"
+          `✅ Updated & Published (${variationName})`
         );
 
       } catch (err) {
