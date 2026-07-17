@@ -232,5 +232,4 @@ Missing Documentation
 Settlement Inquiry 
 
 "Your claim has been approved and is currently in the payment processing stage. Once payment is released, you will receive a confirmation notification." 
-Testtesttest
  
