@@ -3,7 +3,7 @@ TITLE: Policy Exclusions
 
 Overview 
 
-This line is added. Policy exclusions define situations, treatments, expenses, and circumstances under which benefits cannot be paid under the health insurance policy. These exclusions are designed to clearly establish the limits of coverage and help both the insurer and policyholder understand what is and is not covered. Understanding policy exclusions is critical for reducing claim disputes, setting proper customer expectations, and ensuring transparent communication between customers and the insurer. 
+Policy exclusions define situations, treatments, expenses, and circumstances under which benefits cannot be paid under the health insurance policy. These exclusions are designed to clearly establish the limits of coverage and help both the insurer and policyholder understand what is and is not covered. Understanding policy exclusions is critical for reducing claim disputes, setting proper customer expectations, and ensuring transparent communication between customers and the insurer. 
 
 Insurance policies are structured to provide financial protection for medically necessary treatments while excluding risks that fall outside the intended scope of coverage. Every policyholder should review the exclusion section of the policy document before making healthcare decisions. 
 
@@ -19,7 +19,7 @@ Exclusions also help ensure that coverage remains affordable and sustainable whi
 
 Common Categories of Exclusions 
 
-Waiting Period Exclusions 
+TestTestTestWaiting Period Exclusions 
 
 Most health insurance policies include waiting periods that apply to certain illnesses and medical conditions. During this period, expenses related to specific treatments are not eligible for reimbursement. 
 
